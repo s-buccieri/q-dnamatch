@@ -22,7 +22,7 @@ q-dnamatch/
 │   ├── quantum_core/
 |       ├── test_q_loader.py
 |       └── test_q_grover.py
-│   └── test_runtime/
+│   └── runtime/
 |       └── test_q_runtime.py
 ├── docs/
 │   └── presentation.pdf   # [Coppia 3] Slide per il pitch da 5 minuti
