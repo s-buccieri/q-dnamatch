@@ -1,0 +1,7 @@
+qiskit>=1.2
+qiskit-aer>=0.15
+qiskit-ibm-runtime>=0.29
+streamlit>=1.38
+matplotlib>=3.9
+pandas>=2.2
+pytest>=8.3
