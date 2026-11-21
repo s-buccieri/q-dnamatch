@@ -78,6 +78,6 @@ L'esecuzione completa dell'oracolo di Grover segue quindi tre passaggi fondament
 2. **Marcatura di Fase (Comparatore):** controlla i registri `data` e `valid` e applica un *phase kickback* (fase negativa $-1$) esclusivamente allo stato $|i^*\rangle$ che soddisfa il match con il pattern cercato.
 3. **Pulizia (`QROM_DNA.inverse()` - *Uncomputation*):** riavvolge le operazioni della QROM riportando i registri `data` e `valid` allo stato pulito $|0\dots 0\rangle |0\rangle$, ma **preservando la fase $-1$** impressa sull'indice vincente $|i^*\rangle$:
 
-$$|\psi_{\text{oracle}}\rangle = \frac{1}{\sqrt{2^{n_{\text{idx}}}}} \left( \sum_{i \neq i^*} |i\rangle_{\text{idx}} - |i^*\rangle_{\text{idx}} \right) \otimes |0\dots 0\rangle_{\text{data}} \otimes |0\rangle_{\text{valid}}$$
+$$|\psi_{\text{oracle}}\rangle = \frac{1}{\sqrt{2^{n_{\text{idx}}}}} \left( \sum_{i \neq i^{\*}} |i\rangle_{\text{idx}} - |i^{\*}\rangle_{\text{idx}} \right) \otimes |0\dots 0\rangle_{\text{data}} \otimes |0\rangle_{\text{valid}}$$
 
 Una volta che il registro `idx` è stato completamente liberato dall'entanglement con `data` e `valid`, il **Diffusore di Grover** può operare correttamente su `idx`, amplificando l'ampiezza di probabilità dell'indice corretto $|i^*\rangle$ fino a portarla prossima al $100\%$.
