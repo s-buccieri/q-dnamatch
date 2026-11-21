@@ -33,7 +33,7 @@ q-dnamatch/
 
 Il progetto utilizza un modello a **5 branch**: `main` (produzione/demo finale), `dev` (integrazione graduale e test parziali) e **3 branch di lavoro** assegnati alle coppie.
 
-### 1. `feat/bio-product` — Coppia 3: Bio-Product & Pitch
+### 1. `bio-product` — Coppia 3: Bio-Product & Pitch
 * **File di competenza:** `src/dna_core.py`, `app.py`, `tests/test_dna_core.py`, `docs/`
 * **Obiettivi:**
   * Validare le sequenze DNA (`A, C, G, T`), codificarle a 2 bit (`A=00, C=01, G=10, T=11`), generare le finestre (*sliding window*) con padding a potenza di 2 e implementare la ricerca classica con conteggio esatto delle query.
@@ -51,7 +51,7 @@ Il progetto utilizza un modello a **5 branch**: `main` (produzione/demo finale),
     }
     ```
 
-### 2. `feat/quantum-core` — Coppia 1: Quantum Core
+### 2. `quantum-core` — Coppia 1: Quantum Core
 * **File di competenza:** `src/q_loader.py`, `src/q_grover.py`, `tests/test_quantum_core.py`
 * **Obiettivi:**
   * Implementare `build_dna_loader(windows_bin, n_idx, n_data)` come `qiskit.circuit.Gate` (`"QROM_DNA"`) invertibile tramite `.inverse()`.
@@ -60,7 +60,7 @@ Il progetto utilizza un modello a **5 branch**: `main` (produzione/demo finale),
 * **Contratto in uscita (verso `feat/runtime-analytics`):**
   * Circuito `grover_qc: qiskit.QuantumCircuit` con misura applicata solo sui `n_idx` qubit di indice + metadato `iterations: int`.
 
-### 3. `feat/runtime-analytics` — Coppia 2: Runtime & Advantage
+### 3. `runtime-analytics` — Coppia 2: Runtime & Advantage
 * **File di competenza:** `src/q_runtime.py`, `src/analytics.py`, `tests/test_runtime.py`
 * **Obiettivi:**
   * Eseguire `grover_qc` su `AerSimulator` in modalità ideale e rumorosa (`FakeBackend`, es. `FakeBrisbane`), applicando transpilazione ottimizzata (`optimization_level=3`) e decodifica *little-endian* con filtro del rumore.
