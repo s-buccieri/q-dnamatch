@@ -25,7 +25,17 @@ q-dnamatch/
 │   └── runtime/
 |       └── test_q_runtime.py
 ├── docs/
-│   └── presentation.pdf   # [Coppia 3] Slide per il pitch da 5 minuti
+|   ├── presentation/
+│       └── presentation.pdf   # [Coppia 3] Slide per il pitch da 5 minuti
+│   └── explanations/
+│       ├── quantum_core/
+|           ├── q_loader.md
+|           └── q_grover.md
+│       ├── dna_core/
+|           └── dna_core.md
+│       └── runtime/
+|           ├── q_runtime.md
+|           └── analytics.md
 ├── app.py                 # [Coppia 3] Web app interattiva in Streamlit
 ├── requirements.txt
 └── README.md
