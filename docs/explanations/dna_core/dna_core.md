@@ -1,7 +1,7 @@
 # Spiegazione Modulo: DNA Core (Baseline Classica ed Encoding)
 
 ## 1. Cosa fa questo modulo
-Il modulo `dna_core.py` rappresenta il punto di ingresso della pipeline di **Q-DNAMatch** (di competenza della **Coppia 3: Bio-Product & Pitch**). 
+Il modulo `dna_core.py` rappresenta il punto di ingresso della pipeline di **Q-DNAMatch**. 
 
 Il suo scopo principale è:
 1. Tradurre il problema biologico del pattern matching in un formato binario ottimizzato e compatibile con i registri quantistici (**QROM**).
@@ -33,7 +33,7 @@ Eseguiamo una ricerca lineare esaustiva (*classical linear search*) confrontando
 * Ogni confronto effettuato incrementa di 1 il contatore delle `queries`.
 * Il numero totale di query classiche sarà sempre esattamente pari a `valid_len`, confermando la complessità teorica:
   `T_classico = O(N)`
-* Questo dato viene passato alla **Coppia 2 (`runtime-analytics`)** per tracciare il grafico comparativo di scalabilità rispetto alle iterazioni di Grover:
+* Questo dato viene passato al `runtime-analytics` per tracciare il grafico comparativo di scalabilità rispetto alle iterazioni di Grover:
   `T_quantistico = O(√N)`
 
 ---
@@ -58,7 +58,7 @@ La funzione restituisce il dizionario standardizzato **`DNAPayload`**, che rispe
 ```
 
 Questo payload alimenta direttamente:
-* **`q_loader.py` (Coppia 1):** per caricare le finestre nella porta composita `QROM_DNA`.
-* **`q_grover.py` (Coppia 1):** per impostare la condizione di fase dell'oracolo MCZ su `pattern_bin`.
-* **`analytics.py` (Coppia 2):** per confrontare le `queries` classiche con il benchmark quantistico.
-* **`app.py` (Coppia 3):** per mostrare i risultati e l'allineamento nella web app Streamlit.
+* **`q_loader.py`:** per caricare le finestre nella porta composita `QROM_DNA`.
+* **`q_grover.py`:** per impostare la condizione di fase dell'oracolo MCZ su `pattern_bin`.
+* **`analytics.py`:** per confrontare le `queries` classiche con il benchmark quantistico.
+* **`app.py`:** per mostrare i risultati e l'allineamento nella web app Streamlit.

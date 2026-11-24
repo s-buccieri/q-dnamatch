@@ -7,7 +7,7 @@
 
 Per dimostrare in modo rigoroso il valore dell'algoritmo di Grover nella ricerca su sequenze di DNA, non è sufficiente eseguire una singola ricerca: servono strumenti oggettivi per rispondere a tre domande chiave:
 
-1. **Vantaggio asintotico ($O(N)$ vs $O(\sqrt{N})$):** sui simulatori locali possiamo eseguire circuiti completi solo per sequenze piccole ($N = 4, 8, 16$), dove lo speedup non è ancora evidente. Serve quindi combinare i punti simulati con un'estrapolazione analitica fino a $N = 10^6$ basi per rendere visibile il vantaggio quadratico.
+1. **Vantaggio asintotico $(O(N)$ vs $O(\sqrt{N}))$:** sui simulatori locali possiamo eseguire circuiti completi solo per sequenze piccole $(N = 4, 8, 16)$, dove lo speedup non è ancora evidente. Serve quindi combinare i punti simulati con un'estrapolazione analitica fino a $N = 10^6$ basi per rendere visibile il vantaggio quadratico.
 2. **Leggibilità probabilistica:** i dizionari grezzi restituiti dal runtime quantistico devono essere tradotti in visualizzazioni immediate che distinguano i picchi amplificati da Grover dal rumore di fondo.
 3. **Impatto reale del rumore NISQ:** è necessario confrontare sullo stesso piano il simulatore ideale (`AerSimulator`) e il modello hardware reale (`FakeBrisbane`), affiancando alla distribuzione delle probabilità le metriche fisiche di transpilazione (`depth` e gate a 2 qubit).
 
@@ -15,14 +15,14 @@ Per dimostrare in modo rigoroso il valore dell'algoritmo di Grover nella ricerca
 
 ## 2. Formulazione della Soluzione
 
-Il modulo `analytics.py` (di competenza della **Coppia 2: Runtime & Advantage**) separa la raccolta dei dati dalla visualizzazione, seguendo un'architettura **Interface-First**:
+Il modulo `analytics.py` separa la raccolta dei dati dalla visualizzazione, seguendo un'architettura **Interface-First**:
 
 - **Benchmark riproducibile (`build_scaling_dataframe`):** genera un `pd.DataFrame` standardizzato con `seed` fissato (default `42`), combinando punti simulati (collegabili alla pipeline reale dei Rami 1–4 tramite callback `pipeline_runner`) ed estrapolazione analitica fino a $N = 10^6$.
 - **Formula esatta con padding quantistico (`compute_grover_iterations`):** calcola il numero ottimale di iterazioni di Grover tenendo conto dell'arrotondamento alla potenza di 2 superiore:
 
 $$k = \left\lfloor \frac{\pi}{4} \sqrt{\frac{2^{n_{\text{idx}}}}{S}} \right\rfloor, \quad n_{\text{idx}} = \max\left(1,\; \lceil \log_2(\text{valid\_windows}) \rceil\right)$$
 
-- **Tre grafici standardizzati (`matplotlib.figure.Figure`):** restituiscono oggetti `Figure` pronti sia per il rendering diretto in Streamlit (`st.pyplot(fig)`) sia per l'esportazione ad alta risoluzione (PNG/SVG a 300 dpi) tramite `export_figure`.
+- **Tre grafici standardizzati (`matplotlib.figure.Figure`):** restituiscono oggetti `Figure` pronti sia per il rendering diretto in Streamlit (`st.pyplot(fig)`) sia per l'esportazione ad alta risoluzione tramite `export_figure`.
 
 ---
 

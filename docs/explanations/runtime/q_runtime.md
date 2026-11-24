@@ -16,7 +16,7 @@ Una volta costruito il circuito astratto dell'algoritmo di Grover (`q_grover.py`
 
 ## 2. Formulazione della Soluzione
 
-Il modulo `q_runtime.py` (di competenza della **Coppia 2: Runtime & Advantage**) funge da livello di esecuzione e astrazione hardware per la pipeline Q-DNAMatch. La strategia si articola in tre meccanismi:
+Il modulo `q_runtime.py` funge da livello di esecuzione e astrazione hardware per la pipeline Q-DNAMatch. La strategia si articola in tre meccanismi:
 
 - **Doppia modalità di simulazione (`AerSimulator`):**
   - **Ideale (`use_noise=False`):** simulazione matematica priva di errori per verificare la correttezza teorica della ricerca di Grover.
@@ -61,7 +61,7 @@ Orchestratore pubblico del modulo:
 
 ### Contratto di Interfaccia (`ExecutionResult`)
 
-Seguendo l'approccio **Interface-First**, `run_circuit` espone un dizionario standardizzato `ExecutionResult` destinato a `analytics.py` (Coppia 2) e `app.py` (Coppia 3):
+Seguendo l'approccio **Interface-First**, `run_circuit` espone un dizionario standardizzato `ExecutionResult` destinato a `analytics.py` e `app.py`:
 
 ```python
 {
