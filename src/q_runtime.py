@@ -15,7 +15,7 @@ def get_backend(use_noise: bool = False) -> AerSimulator:
     if use_noise:
         fake_hw = FakeBrisbane()
         return AerSimulator.from_backend(fake_hw)
-    return AerSimulator()
+    return AerSimulator(basis_gates=["rz", "sx", "x", "cx"])
 
 
 def count_two_qubit_gates(qc: QuantumCircuit) -> int:
@@ -24,18 +24,10 @@ def count_two_qubit_gates(qc: QuantumCircuit) -> int:
     Nota: i chip IBM Eagle (come FakeBrisbane) usano 'ecr' come gate nativo
     a 2 qubit al posto di 'cx', quindi contiamo qualsiasi istruzione su 2 qubit.
     """
-    return sum(
-        1
-        for instruction in qc.data
-        if instruction.operation.num_qubits == 2
-        and instruction.operation.name not in ("barrier", "measure")
-    )
+    return sum(1 for instruction in qc.data if instruction.operation.num_qubits == 2 and instruction.operation.name not in ("barrier", "measure"))
 
 
-def decode_results(
-    counts: dict[str, int],
-    threshold: float | None = None,
-) -> tuple[list[int], dict[int, float]]:
+def decode_results(counts: dict[str, int], threshold: float | None = None, ) -> tuple[list[int], dict[int, float]]:
     """
     Decodifica i conteggi di Qiskit (little-endian) in indici interi del DNA
     e filtra il rumore di fondo tramite una soglia statistica.
@@ -72,23 +64,15 @@ def decode_results(
     # con distribuzione uniforme ogni stato avrebbe probabilità 1 / 2^n_bits.
     # Richiediamo almeno il doppio della probabilità uniforme (con minimo 0.10).
     if threshold is None:
-        num_states = 2**n_bits if n_bits > 0 else 1
+        num_states = 2 ** n_bits if n_bits > 0 else 1
         threshold = max(0.10, 2.0 / num_states)
 
-    found_indices = sorted(
-        idx for idx, prob in probabilities.items() if prob >= threshold
-    )
+    found_indices = sorted(idx for idx, prob in probabilities.items() if prob >= threshold)
 
     return found_indices, probabilities
 
 
-def run_circuit(
-    grover_qc: QuantumCircuit,
-    shots: int = 1024,
-    use_noise: bool = False,
-    threshold: float | None = None,
-    seed: int | None = 42,
-) -> dict[str, Any]:
+def run_circuit(grover_qc: QuantumCircuit, shots: int = 1024, use_noise: bool = False, threshold: float | None = None, seed: int | None = 42, ) -> dict[str, Any]:
     """
     Transpila (optimization_level=3) ed esegue il circuito di Grover su
     AerSimulator (ideale o rumoroso), restituendo il contratto ExecutionResult.
@@ -114,11 +98,7 @@ def run_circuit(
     backend = get_backend(use_noise=use_noise)
 
     # Transpilazione ottimizzata al massimo livello (level 3)
-    pass_manager = generate_preset_pass_manager(
-        optimization_level=3,
-        backend=backend,
-        seed_transpiler=seed,
-    )
+    pass_manager = generate_preset_pass_manager(optimization_level=3, backend=backend, seed_transpiler=seed)
     transpiled_qc = pass_manager.run(grover_qc)
 
     # Estrazione metriche hardware dal circuito transpilato
@@ -135,10 +115,5 @@ def run_circuit(
     found_indices, probabilities = decode_results(counts, threshold=threshold)
 
     return {
-        "counts": counts,
-        "found_indices": found_indices,
-        "probabilities": probabilities,
-        "depth": depth,
-        "cx_count": cx_count,
-        "exec_time_ms": round(exec_time_ms, 3),
-    } 
+        "counts": counts, "found_indices": found_indices, "probabilities": probabilities, "depth": depth, "cx_count": cx_count, "exec_time_ms": round(exec_time_ms, 3),
+    }

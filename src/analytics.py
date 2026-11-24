@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
 
-
 def compute_grover_iterations(num_windows: int, num_solutions: int = 1) -> int:
     """
     Calcola il numero ottimale di iterazioni di Grover:
@@ -17,20 +16,13 @@ def compute_grover_iterations(num_windows: int, num_solutions: int = 1) -> int:
     if num_windows <= 0 or num_solutions <= 0:
         return 0
     n_idx = max(1, math.ceil(math.log2(num_windows)))
-    space_size = 2**n_idx
+    space_size = 2 ** n_idx
     if num_solutions >= space_size:
         return 0
     return max(1, math.floor((math.pi / 4.0) * math.sqrt(space_size / num_solutions)))
 
 
-def build_scaling_dataframe(
-    simulated_lengths: list[int] | None = None,
-    analytical_lengths: list[int] | None = None,
-    pattern_len: int = 2,
-    num_solutions: int = 1,
-    pipeline_runner: Callable[[str, str], dict[str, Any]] | None = None,
-    seed: int = 42,
-) -> pd.DataFrame:
+def build_scaling_dataframe(simulated_lengths: list[int] | None = None, analytical_lengths: list[int] | None = None, pattern_len: int = 2, num_solutions: int = 1, pipeline_runner: Callable[[str, str], dict[str, Any]] | None = None, seed: int = 42, ) -> pd.DataFrame:
     """
     Genera il DataFrame di benchmark confrontando le query classiche O(N)
     con le iterazioni di Grover O(sqrt(N)) per sequenze di lunghezza crescente,
@@ -73,16 +65,9 @@ def build_scaling_dataframe(
             grover_k = compute_grover_iterations(valid_windows, num_solutions=num_solutions)
 
         speedup = classical_q / grover_k if grover_k > 0 else 1.0
-        rows.append(
-            {
-                "N": n,
-                "valid_windows": valid_windows,
-                "classical_queries": classical_q,
-                "grover_iterations": grover_k,
-                "speedup": round(speedup, 2),
-                "mode": "simulated",
-            }
-        )
+        rows.append({
+            "N": n, "valid_windows": valid_windows, "classical_queries": classical_q, "grover_iterations": grover_k, "speedup": round(speedup, 2), "mode": "simulated",
+        })
 
     # 2. Estrapolazione analitica fino a N = 10^6 basi
     for n in analytical_lengths:
@@ -90,16 +75,9 @@ def build_scaling_dataframe(
         classical_q = valid_windows
         grover_k = compute_grover_iterations(valid_windows, num_solutions=num_solutions)
         speedup = classical_q / grover_k if grover_k > 0 else 1.0
-        rows.append(
-            {
-                "N": n,
-                "valid_windows": valid_windows,
-                "classical_queries": classical_q,
-                "grover_iterations": grover_k,
-                "speedup": round(speedup, 2),
-                "mode": "analytical",
-            }
-        )
+        rows.append({
+            "N": n, "valid_windows": valid_windows, "classical_queries": classical_q, "grover_iterations": grover_k, "speedup": round(speedup, 2), "mode": "analytical",
+        })
 
     df = pd.DataFrame(rows).sort_values("N").reset_index(drop=True)
     return df
@@ -112,48 +90,17 @@ def plot_scaling(df: pd.DataFrame) -> Figure:
     """
     fig, ax = plt.subplots(figsize=(8, 5), dpi=120)
 
-    ax.loglog(
-        df["N"],
-        df["classical_queries"],
-        color="#D62728",
-        linewidth=2.2,
-        marker="o",
-        markersize=5,
-        label="Ricerca Classica — $O(N)$",
-    )
-    ax.loglog(
-        df["N"],
-        df["grover_iterations"],
-        color="#1F77B4",
-        linewidth=2.2,
-        marker="s",
-        markersize=5,
-        label="Grover Quantistico — $O(\\sqrt{N})$",
-    )
+    ax.loglog(df["N"], df["classical_queries"], color="#D62728", linewidth=2.2, marker="o", markersize=5, label="Ricerca Classica — $O(N)$", )
+    ax.loglog(df["N"], df["grover_iterations"], color="#1F77B4", linewidth=2.2, marker="s", markersize=5, label="Grover Quantistico — $O(\\sqrt{N})$", )
 
     # Evidenzia la zona simulata su AerSimulator
     sim_df = df[df["mode"] == "simulated"]
     if not sim_df.empty:
-        ax.axvspan(
-            sim_df["N"].min() * 0.8,
-            sim_df["N"].max() * 1.25,
-            color="#2CA02C",
-            alpha=0.10,
-            label="Zona simulata (Qiskit Aer)",
-        )
+        ax.axvspan(sim_df["N"].min() * 0.8, sim_df["N"].max() * 1.25, color="#2CA02C", alpha=0.10, label="Zona simulata (Qiskit Aer)", )
 
     # Annotazione sullo speedup al massimo N (es. 10^6)
     last_row = df.iloc[-1]
-    ax.annotate(
-        f"Speedup ~{int(last_row['speedup'])}x\n(N = {int(last_row['N']):,})",
-        xy=(last_row["N"], last_row["grover_iterations"]),
-        xytext=(last_row["N"] / 25, last_row["grover_iterations"] * 12),
-        arrowprops=dict(arrowstyle="->", color="#1F77B4", lw=1.2),
-        fontsize=9,
-        fontweight="bold",
-        color="#1F77B4",
-        bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#1F77B4", alpha=0.9),
-    )
+    ax.annotate(f"Speedup ~{int(last_row['speedup'])}x\n(N = {int(last_row['N']):,})", xy=(last_row["N"], last_row["grover_iterations"]), xytext=(last_row["N"] / 25, last_row["grover_iterations"] * 12), arrowprops=dict(arrowstyle="->", color="#1F77B4", lw=1.2), fontsize=9, fontweight="bold", color="#1F77B4", bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#1F77B4", alpha=0.9), )
 
     ax.set_title("Scalabilità: Ricerca Classica $O(N)$ vs Grover $O(\\sqrt{N})$", fontsize=12, fontweight="bold")
     ax.set_xlabel("Lunghezza sequenza DNA ($N$ basi) — scala log", fontsize=10)
@@ -164,11 +111,7 @@ def plot_scaling(df: pd.DataFrame) -> Figure:
     return fig
 
 
-def plot_histogram(
-    exec_result: dict[str, Any],
-    target_indices: list[int] | None = None,
-    title: str = "Distribuzione delle Probabilità (Misura Indici DNA)",
-) -> Figure:
+def plot_histogram(exec_result: dict[str, Any], target_indices: list[int] | None = None, title: str = "Distribuzione delle Probabilità (Misura Indici DNA)", ) -> Figure:
     """
     Grafico 2 (fig_histogram): Istogramma delle probabilità per ciascun indice DNA,
     distinguendo i picchi trovati (match) dal rumore di fondo.
@@ -193,15 +136,7 @@ def plot_histogram(
 
     for bar, prob in zip(bars, probs):
         if prob >= 0.02:
-            ax.text(
-                bar.get_x() + bar.get_width() / 2.0,
-                prob + 0.015,
-                f"{prob * 100:.1f}%",
-                ha="center",
-                va="bottom",
-                fontsize=8.5,
-                fontweight="bold",
-            )
+            ax.text(bar.get_x() + bar.get_width() / 2.0, prob + 0.015, f"{prob * 100:.1f}%", ha="center", va="bottom", fontsize=8.5, fontweight="bold", )
 
     ax.set_ylim(0, min(1.12, max(probs) + 0.15))
     ax.set_title(title, fontsize=12, fontweight="bold")
@@ -213,19 +148,14 @@ def plot_histogram(
     from matplotlib.patches import Patch
 
     legend_handles = [
-        Patch(facecolor="#2CA02C", edgecolor="black", label="Match trovato (sopra soglia)"),
-        Patch(facecolor="#7F7F7F", edgecolor="black", label="Rumore di fondo"),
+        Patch(facecolor="#2CA02C", edgecolor="black", label="Match trovato (sopra soglia)"), Patch(facecolor="#7F7F7F", edgecolor="black", label="Rumore di fondo"),
     ]
     ax.legend(handles=legend_handles, loc="upper right", frameon=True)
     fig.tight_layout()
     return fig
 
 
-def plot_noise_vs_ideal(
-    ideal_result: dict[str, Any],
-    noisy_result: dict[str, Any],
-    target_indices: list[int] | None = None,
-) -> Figure:
+def plot_noise_vs_ideal(ideal_result: dict[str, Any], noisy_result: dict[str, Any], target_indices: list[int] | None = None, ) -> Figure:
     """
     Grafico 3 (fig_noise_vs_ideal): Confronto diretto tra simulatore Ideale e
     simulatore Rumoroso (FakeBrisbane / NISQ), mostrando probabilità per indice
@@ -254,25 +184,14 @@ def plot_noise_vs_ideal(
 
     # Box informativo con metriche hardware (depth, cx_count e fedeltà sui target)
     info_lines = [
-        f"Ideale   — depth: {ideal_result.get('depth', '-')}, 2Q-gates: {ideal_result.get('cx_count', '-')}",
-        f"Rumoroso — depth: {noisy_result.get('depth', '-')}, 2Q-gates: {noisy_result.get('cx_count', '-')}",
+        f"Ideale   — depth: {ideal_result.get('depth', '-')}, 2Q-gates: {ideal_result.get('cx_count', '-')}", f"Rumoroso — depth: {noisy_result.get('depth', '-')}, 2Q-gates: {noisy_result.get('cx_count', '-')}",
     ]
     if target_indices:
         ideal_fid = sum(ideal_probs.get(i, 0.0) for i in target_indices)
         noisy_fid = sum(noisy_probs.get(i, 0.0) for i in target_indices)
         info_lines.append(f"Prob. target — Ideale: {ideal_fid * 100:.1f}% | Rumoroso: {noisy_fid * 100:.1f}%")
 
-    ax.text(
-        0.98,
-        0.95,
-        "\n".join(info_lines),
-        transform=ax.transAxes,
-        ha="right",
-        va="top",
-        fontsize=8.5,
-        family="monospace",
-        bbox=dict(boxstyle="round,pad=0.4", fc="white", ec="#444444", alpha=0.92),
-    )
+    ax.text(0.98, 0.95, "\n".join(info_lines), transform=ax.transAxes, ha="right", va="top", fontsize=8.5, family="monospace", bbox=dict(boxstyle="round,pad=0.4", fc="white", ec="#444444", alpha=0.92), )
 
     ax.set_xticks(x)
     ax.set_xticklabels([str(i) for i in all_indices])
@@ -293,4 +212,4 @@ def export_figure(fig: Figure, output_path: str | Path, dpi: int = 300) -> Path:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=dpi, bbox_inches="tight")
-    return path 
+    return path

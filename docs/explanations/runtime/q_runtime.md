@@ -47,7 +47,7 @@ $$\text{threshold} = \max\left(0.10,\; \frac{2}{2^{n_{\text{idx}}}}\right)$$
 
 Poiché una distribuzione di puro rumore uniforme assegnerebbe probabilità $1 / 2^{n_{\text{idx}}}$ a ogni stato, richiedere almeno il doppio della media uniforme (con minimo $10\%$) isola i picchi reali di Grover dal rumore di fondo.
 
-> **Gestione di indici multipli e verifica dei falsi positivi:** in presenza di occorrenze multiple ($S > 1$) o di rumore elevato, `found_indices` può contenere più indici con probabilità differenti. Dal punto di vista computazionale, mentre la **ricerca** quantistica costa $O(\sqrt{N})$, la **verifica** classica di un singolo indice candidato sulla sequenza DNA costa $O(1)$, permettendo di validare istantaneamente i candidati senza compromettere il vantaggio quantistico.
+> **Gestione di indici multipli e verifica dei falsi positivi:** in presenza di occorrenze multiple $(S > 1)$ o di rumore elevato, `found_indices` può contenere più indici con probabilità differenti. Dal punto di vista computazionale, mentre la **ricerca** quantistica costa $O(\sqrt{N})$, la **verifica** classica di un singolo indice candidato sulla sequenza DNA costa $O(1)$, permettendo di validare istantaneamente i candidati senza compromettere il vantaggio quantistico.
 
 #### 4. `run_circuit(grover_qc, shots=1024, use_noise=False, threshold=None, seed=42)`
 Orchestratore pubblico del modulo:
