@@ -57,6 +57,7 @@ Orchestratore pubblico del modulo:
 4. Esegue la simulazione misurando il tempo in millisecondi con `time.perf_counter()` e `seed_simulator=seed` per garantire la riproducibilità.
 5. Decodifica `result.get_counts()` tramite `decode_results` e restituisce il dizionario `ExecutionResult`.
 
+> **Utilità del seed:** Il parametro seed serve a rendere deterministiche e riproducibili sia la transpilazione del circuito sia la simulazione quantistica. In assenza di seed, ogni esecuzione produrrebbe risultati diversi, rendendo difficile confrontare le prestazioni tra simulazioni ideali e rumorose (Perchè default = 42? beh "la risposta alla domanda fondamentale sulla vita, l'universo e tutto quanto").
 ---
 
 ### Contratto di Interfaccia (`ExecutionResult`)
