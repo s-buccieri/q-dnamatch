@@ -1,10 +1,7 @@
 # Q-DNAMatch — Quantum DNA Pattern Matching
 
-**Q-DNAMatch** è un prototipo sviluppato in **Qiskit** per il **Qiskit Fall Fest 2026 (Catania)** nell'ambito della traccia *Quantum per le Scienze della Vita*. Il progetto affronta uno dei problemi fondamentali della bioinformatica — l'individuazione di specifiche sottostringhe genetiche (come mutazioni o *motif*) all'interno di sequenze di DNA — sfruttando l'algoritmo di **Grover** per dimostrare il vantaggio quantistico quadratico $O(\sqrt{N})$ rispetto alla ricerca lineare classica $O(N)$.
-
-L'architettura traduce le basi azotate in una codifica binaria a 2 bit (`A=00`, `C=01`, `G=10`, `T=11`) e scompone la sequenza tramite *sliding window*. Un modulo dedicato costruisce una **QROM (Quantum Read-Only Memory)** reversibile che carica tutte le finestre di DNA in sovrapposizione quantistica, proteggendo gli stati di padding tramite un qubit di validità dedicato per evitare falsi positivi (come il pattern `"AA"`). L'oracolo di fase confronta in parallelo le finestre con il pattern cercato tramite un gate `MCZ`, esegue l'*uncomputation* dei registri ausiliari per rimuovere l'entanglement residuo e lascia al diffusore di Grover il compito di amplificare la probabilità degli indici corretti nel numero ottimale di iterazioni.
-
-Il circuito viene infine transpilato al massimo livello di ottimizzazione (`optimization_level=3`) ed eseguito tramite `AerSimulator` sia in regime ideale sia con il modello di rumore realistico **IBM `FakeBrisbane`**, permettendo di valutare l'impatto dell'hardware NISQ su fedeltà, profondità e numero di gate a due qubit. L'intera pipeline è accessibile attraverso una web app interattiva in **Streamlit** che integra la demo live con evidenziazione dei match sul DNA, l'ispezione del circuito, i grafici di scalabilità fino a $10^6$ basi e il confronto diretto tra simulazione ideale e rumorosa.
+Prototipo sviluppato in **Qiskit** per il **Qiskit Fall Fest 2026 (Catania)** — traccia *Quantum per le Scienze della Vita*.  
+L'obiettivo è individuare rapidamente una sottostringa genetica (es. una mutazione o un *motif*) all'interno di una sequenza di DNA utilizzando una ricerca di **Grover basata su QROM**, dimostrando il vantaggio quantistico quadratico $O(\sqrt{N})$ rispetto alla ricerca lineare classica $O(N)$.
 
 ---
 
@@ -14,13 +11,112 @@ Il circuito viene infine transpilato al massimo livello di ottimizzazione (`opti
 q-dnamatch/
 ├── src/
 │   ├── __init__.py
-│   ├── dna_core.py        # Codifica DNA 2-bit, sliding window e baseline classica O(N)
-│   ├── q_loader.py        # Circuito QROM invertibile per il caricamento delle finestre DNA
-│   ├── q_grover.py        # Oracolo di fase MCZ, uncomputation, diffusore e circuito Grover
-│   ├── q_runtime.py       # Transpilazione, esecuzione AerSimulator (ideale e FakeBrisbane) e decodifica
-│   └── analytics.py       # Benchmark di scalabilità O(N) vs O(sqrt(N)) e generazione grafici
-├── tests/                 # Test unitari e di integrazione end-to-end (pytest)
-├── docs/                  # Documentazione tecnica e slide del pitch
-├── app.py                 # Web app interattiva in Streamlit
+│   ├── dna_core.py        # [Coppia 3] Codifica DNA 2-bit, sliding window, baseline classica
+│   ├── q_loader.py        # [Coppia 1] Circuito QROM per caricamento finestre DNA + inverse()
+│   ├── q_grover.py        # [Coppia 1] Oracolo comparatore MCZ, uncomputation e diffusore
+│   ├── q_runtime.py       # [Coppia 2] Esecuzione AerSimulator (ideale & FakeBackend), transpilazione
+│   └── analytics.py       # [Coppia 2] Benchmark O(N) vs O(sqrt(N)) e generazione grafici
+├── tests/
+│   ├── dna_core/
+|       └── test_dna_core.py
+│   ├── quantum_core/
+|       ├── test_q_loader.py
+|       └── test_q_grover.py
+│   └── runtime/
+|       └── test_q_runtime.py
+├── docs/
+│   └── presentation.pdf   # [Coppia 3] Slide per il pitch da 5 minuti
+├── app.py                 # [Coppia 3] Web app interattiva in Streamlit
 ├── requirements.txt
 └── README.md
+```
+
+---
+
+## Strategia dei Branch e Specifiche per Coppia
+
+Il progetto utilizza un modello a **5 branch**: `main` (produzione/demo finale), `dev` (integrazione graduale e test parziali) e **3 branch di lavoro** assegnati alle coppie.
+
+### 1. `bio-product` — Coppia 3: Bio-Product & Pitch
+* **File di competenza:** `src/dna_core.py`, `app.py`, `tests/dna_core/test_dna_core.py`, `docs/`
+* **Obiettivi:**
+  * Validare le sequenze DNA (`A, C, G, T`), codificarle a 2 bit (`A=00, C=01, G=10, T=11`), generare le finestre (*sliding window*) con padding a potenza di 2 e implementare la ricerca classica con conteggio esatto delle query.
+  * Sviluppare l'interfaccia Streamlit (3 tab: *Demo Live*, *Classico vs Quantistico*, *Hardware & Noise*) e coordinare le slide del pitch da 5 minuti.
+* **Contratto in uscita (verso `quantum-core` e `runtime-analytics`):**
+  * Dizionario `DNAPayload`:
+    ```python
+    {
+        "windows_bin": list[str],
+        "pattern_bin": str,
+        "n_idx": int,
+        "n_data": int,
+        "valid_len": int,
+        "classical_res": dict  # {"indices": list[int], "queries": int}
+    }
+    ```
+
+### 2. `quantum-core` — Coppia 1: Quantum Core
+* **File di competenza:** `src/q_loader.py`, `src/q_grover.py`, `tests/test_quantum_core/test_q_loader.py`, `tests/test_quantum_core/test_q_grover.py`
+* **Obiettivi:**
+  * Implementare `build_dna_loader(windows_bin, n_idx, n_data)` come `qiskit.circuit.Gate` (`"QROM_DNA"`) invertibile tramite `.inverse()`.
+  * Implementare l'oracolo di fase (`MCZ` + *uncomputation* del registro dati), il diffusore sui soli qubit di indice e il calcolo del numero ottimale di iterazioni $k = \lfloor \frac{\pi}{4}\sqrt{2^{n_{\text{idx}}} / S} \rfloor$.
+* **Contratto in ingresso:** `DNAPayload` (da `bio-product`).
+* **Contratto in uscita (verso `runtime-analytics`):**
+  * Circuito `grover_qc: qiskit.QuantumCircuit` con misura applicata solo sui `n_idx` qubit di indice + metadato `iterations: int`.
+
+### 3. `runtime-analytics` — Coppia 2: Runtime & Advantage
+* **File di competenza:** `src/q_runtime.py`, `src/analytics.py`, `tests/test_runtime/test_q_runtime.py`
+* **Obiettivi:**
+  * Eseguire `grover_qc` su `AerSimulator` in modalità ideale e rumorosa (`FakeBackend`, es. `FakeBrisbane`), applicando transpilazione ottimizzata (`optimization_level=3`) e decodifica *little-endian* con filtro del rumore.
+  * Produttore dei 3 grafici chiave: scalabilità $O(N)$ vs $O(\sqrt{N})$, istogramma delle probabilità e confronto Ideale vs Rumoroso.
+* **Contratto in ingresso:** `grover_qc` (da `quantum-core`) e `DNAPayload` (da `bio-product`).
+* **Contratto in uscita (verso `bio-product` / `app.py`):**
+  * Dizionario `ExecutionResult`:
+    ```python
+    {
+        "counts": dict[str, int],
+        "found_indices": list[int],
+        "probabilities": dict[int, float],
+        "depth": int,
+        "cx_count": int,
+        "exec_time_ms": float
+    }
+    ```
+  * Oggetti grafici `fig_scaling`, `fig_histogram`, `fig_noise_vs_ideal` (`matplotlib`/`plotly`).
+
+---
+
+## Workflow di Merge Graduale e Test Parziali
+
+Per evitare conflitti dell'ultimo minuto, **nessuna coppia fa merge diretto su `main`**. L'integrazione avviene progressivamente sul branch `dev` tramite Pull Request (PR):
+
+1. **Fase 1 — Sviluppo isolato (Giorni 1–2):**
+   * Ogni coppia lavora sul proprio branch `feat/*` utilizzando dati *mock* conformi ai contratti API sopra definiti.
+   * Prima di aprire una PR, tutti gli unit test locali (`pytest`) del proprio modulo devono passare.
+2. **Fase 2 — Merge graduali su `dev` per test parziali (Giorno 3):**
+   * **Step A:** `bio-product` fa merge di `dna_core.py` su `dev`. Le altre coppie fanno `git pull origin dev` per usare il vero encoding DNA al posto dei mock.
+   * **Step B:** `quantum-core` fa merge su `dev`. **Test parziale 1:** verifica `dna_core` $\to$ `q_loader` $\to$ `q_grover` su `Statevector`.
+   * **Step C:** `runtime-analytics` fa merge su `dev`. **Test parziale 2:** verifica `grover_qc` $\to$ `q_runtime` (ideale e rumoroso) $\to$ `analytics`.
+   * **Step D:** `bio-product` collega `app.py` ai moduli reali presenti su `dev` e apre PR verso `dev`.
+3. **Fase 3 — Riunione Finale e Merge su `main` (Giorno 4, Code Freeze):**
+   * Tutto il team si riunisce per eseguire il **test end-to-end completo** su `dev` (UI Streamlit, casi limite, grafici e benchmark).
+   * Solo quando l'intera pipeline funziona senza errori, si apre la PR finale `dev` $\to$ `main`, si effettua il merge e si blocca il codice per la presentazione del 25 Novembre.
+
+---
+
+## Installazione e Avvio Rapido
+
+```bash
+# 1. Crea e attiva un ambiente virtuale
+python -m venv .venv
+source .venv/bin/activate  # Su Windows: .venv\Scripts\activate
+
+# 2. Installa le dipendenze
+pip install -r requirements.txt
+
+# 3. Esegui i test unitari
+pytest
+
+# 4. Avvia la web app
+streamlit run app.py
+```
