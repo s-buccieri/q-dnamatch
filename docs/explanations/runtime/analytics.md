@@ -20,9 +20,9 @@ Il modulo `analytics.py` separa la raccolta dei dati dalla visualizzazione, segu
 - **Benchmark riproducibile (`build_scaling_dataframe`):** genera un `pd.DataFrame` standardizzato con `seed` fissato (default `42`), combinando punti simulati (collegabili alla pipeline reale dei Rami 1–4 tramite callback `pipeline_runner`) ed estrapolazione analitica fino a $N = 10^6$.
 - **Formula esatta con padding quantistico (`compute_grover_iterations`):** calcola il numero ottimale di iterazioni di Grover tenendo conto dell'arrotondamento alla potenza di 2 superiore:
 
-$$
-k = \left\lfloor \frac{\pi}{4} \sqrt{\frac{2^{n_{\text{idx}}}}{S}} \right\rfloor, \quad n_{\text{idx}} = \max\left(1,\; \lceil \log_2(\text{valid\_windows}) \rceil\right)
-$$
+```math
+k = \left\lfloor \frac{\pi}{4} \sqrt{\frac{2^{n_{\text{idx}}}}{S}} \right\rfloor, \quad n_{\text{idx}} = \max\left(1,\; \lceil \log_2(\text{valid windows}) \rceil\right)
+```
 
 - **Tre grafici standardizzati (`matplotlib.figure.Figure`):** restituiscono oggetti `Figure` pronti sia per il rendering diretto in Streamlit (`st.pyplot(fig)`) sia per l'esportazione ad alta risoluzione tramite `export_figure`.
 
